@@ -1,0 +1,33 @@
+{
+  "name": "@live2ride/dbLog",
+  "version": "1.0.0",
+  "description": "simple logging to mssql database",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test/test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/live2ride/dbLog.git"
+  },
+  "keywords": [
+    "mssql",
+    "sql",
+    "log"
+  ],
+  "author": "live2ride",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/live2ride/dbLog/issues"
+  },
+  "homepage": "https://github.com/live2ride/dbLog#readme",
+  "dependencies": {
+    "@live2ride/db": "^1.0.5",
+    "@live2ride/log": "^1.0.3",
+    "dotenv": "^16.0.3",
+    "mssql": "^9.0.1"
+  },
+  "directories": {
+    "test": "test"
+  }
+}
