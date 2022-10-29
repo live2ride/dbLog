@@ -1,8 +1,8 @@
 {
-  "name": "@live2ride/dbLog",
-  "version": "1.0.0",
+  "name": "@live2ride/dblog",
+  "version": "1.1.0",
   "description": "simple logging to mssql database",
-  "main": "index.js",
+  "main": "index",
   "scripts": {
     "test": "node test/test.js"
   },
@@ -23,9 +23,7 @@
   "homepage": "https://github.com/live2ride/dbLog#readme",
   "dependencies": {
     "@live2ride/db": "^1.0.5",
-    "@live2ride/log": "^1.0.3",
-    "dotenv": "^16.0.3",
-    "mssql": "^9.0.1"
+    "@live2ride/log": "^1.0.3"
   },
   "directories": {
     "test": "test"
