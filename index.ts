@@ -1,6 +1,6 @@
 const log = require("@live2ride/log");
 
-interface DBinterface {
+interface IDB {
   db: any;
   logid: number | null;
   heartbeat?: any;
@@ -15,7 +15,7 @@ interface ILog {
 }
 type PlainObj = { [k: string]: any };
 
-class DBLog implements DBinterface {
+export default class DBLog implements IDB {
   db: any;
   logid: number | null = null; //must be undefined, null means id has been cleared due to error
   heartbeat: any;
@@ -33,9 +33,9 @@ class DBLog implements DBinterface {
     const params = { title: title, msg: msg, props: props };
     const { logid } = await this.db.exec(qry, params, true);
     this.logid = logid;
-    this.startHeartbeat();
+    this.#startHeartbeat();
   }
-  startHeartbeat() {
+  #startHeartbeat() {
     this.heartbeat = setInterval(async () => {
       if (!this.logid) return;
       let qry = `update dbo.log set heartbeat = sysdatetime() where logid = @_logid`;
@@ -49,7 +49,7 @@ class DBLog implements DBinterface {
     }
   }
 
-  getFields(props: any) {
+  #getFields(props: any) {
     let fields = "";
 
     ["title", "msg", "props", "error", "status"].forEach((f) => {
@@ -68,7 +68,7 @@ class DBLog implements DBinterface {
     }
     await this.isReady();
 
-    const fields = this.getFields(props);
+    const fields = this.#getFields(props);
     const qry = `update dbo.log set 
                         ${props?.end_time ? " end_time = sysdatetime(), " : ""}
                         ${fields}

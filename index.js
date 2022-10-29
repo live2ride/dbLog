@@ -8,9 +8,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (receiver, state, kind, f) {
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
+};
+var _DBLog_instances, _DBLog_startHeartbeat, _DBLog_getFields;
+Object.defineProperty(exports, "__esModule", { value: true });
 const log = require("@live2ride/log");
 class DBLog {
     constructor(db) {
+        _DBLog_instances.add(this);
         this.logid = null; //must be undefined, null means id has been cleared due to error
         this.startCounter = 0;
         this.db = db;
@@ -24,16 +32,8 @@ class DBLog {
             const params = { title: title, msg: msg, props: props };
             const { logid } = yield this.db.exec(qry, params, true);
             this.logid = logid;
-            this.startHeartbeat();
+            __classPrivateFieldGet(this, _DBLog_instances, "m", _DBLog_startHeartbeat).call(this);
         });
-    }
-    startHeartbeat() {
-        this.heartbeat = setInterval(() => __awaiter(this, void 0, void 0, function* () {
-            if (!this.logid)
-                return;
-            let qry = `update dbo.log set heartbeat = sysdatetime() where logid = @_logid`;
-            yield this.db.exec(qry, { logid: this.logid });
-        }), 5000);
     }
     isReady() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -42,15 +42,6 @@ class DBLog {
             }
         });
     }
-    getFields(props) {
-        let fields = "";
-        ["title", "msg", "props", "error", "status"].forEach((f) => {
-            if (props[f]) {
-                fields += `${f} = @_${f},`;
-            }
-        });
-        return fields.slice(0, -1);
-    }
     updateAll(props) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!this.logid || !props) {
@@ -58,7 +49,7 @@ class DBLog {
                 return;
             }
             yield this.isReady();
-            const fields = this.getFields(props);
+            const fields = __classPrivateFieldGet(this, _DBLog_instances, "m", _DBLog_getFields).call(this, props);
             const qry = `update dbo.log set 
                         ${(props === null || props === void 0 ? void 0 : props.end_time) ? " end_time = sysdatetime(), " : ""}
                         ${fields}
@@ -179,3 +170,20 @@ end`,
         });
     }
 }
+exports.default = DBLog;
+_DBLog_instances = new WeakSet(), _DBLog_startHeartbeat = function _DBLog_startHeartbeat() {
+    this.heartbeat = setInterval(() => __awaiter(this, void 0, void 0, function* () {
+        if (!this.logid)
+            return;
+        let qry = `update dbo.log set heartbeat = sysdatetime() where logid = @_logid`;
+        yield this.db.exec(qry, { logid: this.logid });
+    }), 5000);
+}, _DBLog_getFields = function _DBLog_getFields(props) {
+    let fields = "";
+    ["title", "msg", "props", "error", "status"].forEach((f) => {
+        if (props[f]) {
+            fields += `${f} = @_${f},`;
+        }
+    });
+    return fields.slice(0, -1);
+};
