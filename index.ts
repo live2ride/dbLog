@@ -12,32 +12,6 @@ type LogProps = {
   print?: boolean
 }
 
-const printToConsole = (type: string, var1: any = "", var2: any = "", var3: any = "") => {
-  const log: any = { ...console };
-  log.log = console?.info || console.log;
-
-
-  // if(!log.success) log.success = console.log;
-
-  switch (type) {
-    case "success": {
-      log.info(var1, var2, var3);
-      break;
-    }
-    case "warning": {
-      log.warn(var1, var2, var3);
-      break;
-    }
-    case "error": {
-      log.error(var1, var2, var3);
-      break;
-    }
-    default: {
-      log.debug(var1, var2, var3);
-    }
-
-  }
-};
 export default class DBLog implements DBProps {
   db: any;
 
@@ -92,7 +66,7 @@ export default class DBLog implements DBProps {
   }
 
   async start(title: string, msg?: string, props?: PlainObj) {
-    if (this.options.print) return printToConsole("", msg, props);
+    if (this.options.print) return console.log(msg, props);
 
     const qry = `insert into dbo.log (title, msg, props, heartbeat) 
                     select @_title, @_msg, @_props, sysdatetime()
@@ -189,13 +163,13 @@ export default class DBLog implements DBProps {
   }
 
   async warning(msg: string, props?: PlainObj) {
-    if (this.options.print) return printToConsole("warning", msg, props);
+    if (this.options.print) return console.warn(msg, props);
 
     await this.updateAll({ status: "warning", end_time: true, msg, props });
   }
 
   async error(err: any, props?: any) {
-    if (this.options.print) return printToConsole("error", err, props);
+    if (this.options.print) return console.error(err, props);
 
     await this.updateAll({
       status: "error",
@@ -208,13 +182,13 @@ export default class DBLog implements DBProps {
   }
 
   async success(msg?: string | null, props?: PlainObj) {
-    if (this.options.print) return printToConsole("success", msg, props);
+    if (this.options.print) return console.info(msg, props);
 
     await this.updateAll({ status: "success", end_time: true, msg, props });
   }
 
   async update(msg: string, props?: PlainObj) {
-    if (this.options.print) return printToConsole("update:|:", msg, props);
+    if (this.options.print) return console.log("update:|:", msg, props);
 
     await this.updateAll({ msg, props });
   }
