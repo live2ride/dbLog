@@ -1,7 +1,7 @@
 const dotenv = require("dotenv");
 dotenv.config();
 
-// const DB = require("@live2ride/db");
+// const DB = require("src/modules/db");
 const DB = require("../../db");
 const DBLog = require("../index");
 

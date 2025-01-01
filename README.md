@@ -1,10 +1,43 @@
-# Description
+# MS SQL Server Logging Library
 
-Easily logging events to Microsoft SQL database (MSSQL);
+Easily log events to a Microsoft SQL Server (MSSQL) database using JavaScript.
 
-### Config
+## Table of Contents
+
+- [Installation](#installation)
+- [Configuration](#configuration)
+  - [Direct Configuration](#direct-configuration)
+- [Usage](#usage)
+  - [Setup](#setup)
+  - [Logging Events](#logging-events)
+- [Examples](#examples)
+  - [Fetching Logs](#fetching-logs)
+- [Database Schema](#database-schema)
+  - [Log Table Fields](#log-table-fields)
+- [Troubleshooting](#troubleshooting)
+
+## Installation
 
 ```javascript
+import { dbLogSetup } from "@live2ride/dbLog";
+
+dbLogSetup();
+/*
+Creates tables `log` and `logDetails`.
+*/
+```
+
+## Configuration
+
+### Direct Configuration
+
+Configure the database connection using environment variables and initialize the logging library.
+
+```javascript
+import DB from "@live2ride/db";
+import DBLog from "@live2ride/dbLog";
+
+// Database configuration
 const dbConfig = {
   database: process.env.DB_DATABASE,
   user: process.env.DB_USER,
@@ -12,80 +45,113 @@ const dbConfig = {
   server: process.env.DB_SERVER,
 };
 
-const DB = require("@live2ride/db");
+// Initialize database and logger
 const db = new DB(dbConfig);
-
-const DBLog = require("@live2ride/dbLog");
 const dbLog = new DBLog(db);
+```
 
+## Usage
 
-dbLog.setup() // create all the tables and functions
+### Setup
 
+Create all necessary tables and functions in the database.
 
-//start log
-dbLog.start(
-  title: "some cleanup process",
-  message: "cleanup started",
+```javascript
+dbLog.setup();
+```
+
+### Logging Events
+
+Start a log, update it with messages, and finalize with a status.
+
+```javascript
+// Start log
+dbLog.start({
+  title: "Some Cleanup Process",
+  message: "Cleanup started",
   props: {
     dir: "/xyz",
     options: {
-      more: "additiona loptions"
-    }
-  }
-)
-dbLog.update("cleaning dir xyz");
-dbLog.update("finished cleaning xyz/abc");
-dbLog.update("finished cleaning xyz/def");
+      more: "Additional options",
+    },
+  },
+});
 
+// Update log with progress
+dbLog.update("Cleaning directory xyz");
+dbLog.update("Finished cleaning xyz/abc");
+dbLog.update("Finished cleaning xyz/def");
 
-dbLog.success("cleanup finished");
-    or
-dbLog.warning("missed few files");
-    or
-dbLog.error(new Error("some error"))
+// Finalize log with status
+dbLog.success("Cleanup finished");
+// or
+dbLog.warning("Missed a few files");
+// or
+dbLog.error(new Error("Some error occurred"));
+```
 
+## Examples
 
-const logs = await db.exec('select * from dbo.log');
+### Fetching Logs
+
+Retrieve all logs from the database.
+
+```javascript
+const logs = await db.exec('SELECT * FROM dbo.log');
 console.log(logs);
-example:
+
+/*
+Example Output:
 [
   {
     logid: ********,
     status: 'success',
     title: 'dbLogger',
-    msg: 'finished',
+    msg: 'Finished',
     start_time: ********,
     end_time: ********,
-    props: { obj: 'some additional props' },
+    props: { obj: 'Some additional props' },
     error: undefined,
     heartbeat: ********,
     run_time: 1
   }
 ]
-
-
-const ld = await db.exec('select msg from dbo.logDetails where logid = @_logid', {logid: logs[0].logid});
-console.log(ld);
-example:
-[
-  { msg: 'update 1' },
-  { msg: 'update 2' },
-  { msg: 'update 3' },
-  { msg: 'finished' }
-]
+*/
 ```
 
-#
+Retrieve log details for a specific log ID.
 
-##### All table fields
+```javascript
+const ld = await db.exec(
+  'SELECT msg FROM dbo.logDetails WHERE logid = @_logid',
+  { logid: logs[0].logid }
+);
+console.log(ld);
 
-- **logid**: identity column
-- **status**: success, warning, error
-- **title**: title identifies your process
-- **msg**: additional messages (all messages are saved in logDetails)
-- **start_time**: time process started
-- **end-time**: time processes ended
-- **props**: any object you want to save for troubleshooting like parameters
-- **error**: field to hold your error object for easier troubleshooting
-- **heartbeat**: dbLog checks in every few second to show its alive
-- **run_time**: length the process has been alive in seconds
+/*
+Example Output:
+[
+  { msg: 'Update 1' },
+  { msg: 'Update 2' },
+  { msg: 'Update 3' },
+  { msg: 'Finished' }
+]
+*/
+```
+
+## Database Schema
+
+### Log Table Fields
+
+- **logid**: Identity column.
+- **status**: `success`, `warning`, `error`.
+- **title**: Title identifying your process.
+- **msg**: Additional messages (all messages are saved in `logDetails`).
+- **start_time**: Time the process started.
+- **end_time**: Time the process ended.
+- **props**: Any object you want to save for troubleshooting, such as parameters.
+- **error**: Field to hold your error object for easier troubleshooting.
+- **heartbeat**: Indicates that `dbLog` is alive by checking in every few seconds.
+- **run_time**: Duration the process has been running in seconds.
+
+ 
