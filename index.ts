@@ -11,6 +11,7 @@ type PlainObj = { [k: string]: any };
 type LogProps = {
   print?: boolean
 }
+const sleep = (timeout: number = 100) => new Promise((resolve) => setTimeout(resolve, timeout));
 
 export default class DBLog implements DBProps {
   db: any;
@@ -88,7 +89,7 @@ export default class DBLog implements DBProps {
 
   async isReady() {
     while (!this.logid) {
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await sleep();
     }
   }
 
@@ -133,7 +134,7 @@ export default class DBLog implements DBProps {
     } if (!this.logid) {
       for (let i = 0; i < 100; i += 1) {
         if (this.logid) break;
-        await new Promise((resolve) => setTimeout(resolve, 100));
+        await sleep()
       }
       if (!this.logid) return;
     }
