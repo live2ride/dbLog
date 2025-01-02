@@ -213,6 +213,29 @@ export default class DBLog implements DBProps {
     },
   }
 
-
+  get = {
+    recent: async () => {
+      return this.db.exec(`select top 100 * from dbo.log order by logid desc`)
+    },
+    warnings: async () => {
+      return this.db.exec(`select * from dbo.log where status = @_status  order by logid desc`, { status: "warning" })
+    },
+    errors: async () => {
+      return this.db.exec(`select * from dbo.log where status = @_status order by logid desc`, { status: "error" })
+    },
+    log: async (logid: number) => {
+      return this.db.exec(`
+        select *,
+        (
+          select msg 
+          from dbo.logDetails 
+          where logid = l.logid 
+          and msg is not null 
+          for json auto
+        ) as messages
+        from dbo.log l 
+        where logid = @_logid`, { logid })
+    }
+  }
 
 }

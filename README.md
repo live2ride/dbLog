@@ -4,7 +4,6 @@ Easily log events to a Microsoft SQL Server (MSSQL) database using JavaScript.
 
 ## Table of Contents
 
-- [Installation](#installation)
 - [Configuration](#configuration)
   - [Direct Configuration](#direct-configuration)
 - [Usage](#usage)
@@ -57,7 +56,8 @@ const dbLog = new DBLog(db);
 Create all necessary tables and functions in the database.
 
 ```javascript
-dbLog.setup();
+import {dbLogSetup} from "@live2ride/dbLog";
+dbLogSetup();
 ```
 
 ### Logging Events
