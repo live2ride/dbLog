@@ -28,6 +28,15 @@ Creates tables `log` and `logDetails`.
 
 ## Configuration
 
+### Setup
+
+Create all necessary tables and functions in the database.
+
+```javascript
+import {dbLogSetup} from "@live2ride/dbLog";
+dbLogSetup();
+```
+
 ### Direct Configuration
 
 Configure the database connection using environment variables and initialize the logging library.
@@ -51,14 +60,6 @@ const dbLog = new DBLog(db);
 
 ## Usage
 
-### Setup
-
-Create all necessary tables and functions in the database.
-
-```javascript
-import {dbLogSetup} from "@live2ride/dbLog";
-dbLogSetup();
-```
 
 ### Logging Events
 
@@ -119,24 +120,13 @@ Example Output:
 */
 ```
 
-Retrieve log details for a specific log ID.
+ 
 
 ```javascript
-const ld = await db.exec(
-  'SELECT msg FROM dbo.logDetails WHERE logid = @_logid',
-  { logid: logs[0].logid }
-);
-console.log(ld);
-
-/*
-Example Output:
-[
-  { msg: 'Update 1' },
-  { msg: 'Update 2' },
-  { msg: 'Update 3' },
-  { msg: 'Finished' }
-]
-*/
+await dbLog.get.recent()
+await dbLog.get.log(logid)
+await dbLog.get.errors()
+await dbLog.get.warnings()
 ```
 
 ## Database Schema
