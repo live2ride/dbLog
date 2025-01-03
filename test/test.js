@@ -23,11 +23,11 @@ async function showLogData() {
   // res = await db.exec(qry);
   // console.log(res);
 
-  const logs = await db.exec("select top 1 * from dbo.log");
-  console.log(logs);
+  const log = await db.exec("select * from dbo.log order by logid desc", true);
+  console.log(log);
   const ld = await db.exec(
     "select msg from dbo.logDetails where logid = @_logid",
-    { logid: logs[0].logid }
+    { logid: log.logid }
   );
   console.log(ld);
 }
