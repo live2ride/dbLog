@@ -15,16 +15,7 @@ Easily log events to a Microsoft SQL Server (MSSQL) database using JavaScript.
   - [Log Table Fields](#log-table-fields)
 - [Troubleshooting](#troubleshooting)
 
-## Installation
-
-```javascript
-import { dbLogSetup } from "@live2ride/dbLog";
-
-dbLogSetup();
-/*
-Creates tables `log` and `logDetails`.
-*/
-```
+ 
 
 ## Configuration
 
@@ -124,7 +115,7 @@ Example Output:
 
 ```javascript
 await dbLog.get.recent()
-await dbLog.get.log(logid)
+await dbLog.get.log(logid) /* with additional column **messages** an array of logDetails messages  */
 await dbLog.get.errors()
 await dbLog.get.warnings()
 ```
