@@ -1,6 +1,11 @@
-import debug, { Debugger } from "debug"
-import { DBProps, LogProps, PlainObj } from "./types"
+import type { Debugger } from "debug"
+
+import debug from "debug"
+
 import { serializeError } from "./utils/serialize-error"
+
+import type { DBProps, LogProps, PlainObj } from "./types"
+
 export { dbLogSetup } from "./utils/setup"
 const debugNamespace = "dblog"
 
@@ -98,7 +103,7 @@ export default class DBLog implements DBProps {
       props,
     }
 
-    const { logid } = await this.db.exec(query, params, true)
+    const { logid } = (await this.db.exec(query, params, true)) || {}
 
     this.logid = logid
     this.#startHeartbeat()
@@ -183,20 +188,16 @@ export default class DBLog implements DBProps {
 
     const qry = `UPDATE dbo.log SET ${setClauses.join(", ")} WHERE logid = @_logId`
 
-    try {
-      await this.db.exec(qry, { ...props, logId: this.logid })
-      if (props.end_time) {
-        this.#clear()
-      }
-    } catch (error) {
-      throw error
+    await this.db.exec(qry, { ...props, logId: this.logid })
+    if (props.end_time) {
+      this.#clear()
     }
   }
 
-  async warning(msg: string, props?: PlainObj) {
+  async warning(msg: string, props?: PlainObj, error?: any) {
     log && log("\x1b[33m", msg, props)
 
-    await this.updateAll({ status: "warning", end_time: true, msg, props })
+    await this.updateAll({ status: "warning", end_time: true, msg, props, error })
   }
 
   async error(err: any, props?: any) {
@@ -210,7 +211,7 @@ export default class DBLog implements DBProps {
       end_time: true,
       msg: err?.message,
       props,
-      error: error,
+      error,
     })
     this.logid = null
   }
@@ -244,7 +245,7 @@ export default class DBLog implements DBProps {
         where title = @_title
       )
         `,
-        { title: title }
+        { title }
       )
     },
   }
