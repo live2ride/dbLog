@@ -134,14 +134,16 @@ export default class DBLog implements DBProps {
 
   #get = {
     last: async (title: string, msg?: string) => {
-      const qry = `select top 1 *,
-                case
-                  when end_time is not null then 'false'
-                  when datediff(second, heartbeat, getdate()) < 60 then 'true'
-                else 'false'
-                end as isRunning
-        from dbo.log
-        where title = @_title
+      const qry = `SELECT TOP (1) l.*,
+                  CAST(
+                    CASE 
+                      WHEN l.end_time IS NULL 
+                      AND l.heartbeat >= DATEADD(SECOND, -60, SYSUTCDATETIME())
+                      THEN 1 ELSE 0 
+                    END AS bit
+                  ) AS isRunning
+                FROM dbo.log AS l
+                WHERE l.title = @_title
         ${msg ? "and msg = @_msg" : ""}
         order by logid desc`
       const res = await this.db.exec(qry, { title, msg }, true)
