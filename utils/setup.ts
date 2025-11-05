@@ -54,10 +54,10 @@ end`,
             await db.exec(obj.cmd);
             console.debug("dbLog setup: created", obj.msg);
         } catch (err: any) {
-            if (err?.msg?.includes("is already")) {
+            if (err?.message?.includes("is already")) {
                 // log.error("dbLog setup: ", obj.msg, " already exist");
             } else {
-                console.error("unable to execute following query due to error:", err.msg, "\n");
+                console.error("unable to execute following query due to error:", err.message, "\n");
                 console.error(obj.cmd);
 
                 throw err;

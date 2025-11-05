@@ -18,7 +18,7 @@ const sleep = (timeout: number = 100) => new Promise((resolve) => setTimeout(res
 export default class DBLog implements DBProps {
   db: any
 
-  logid: number | null = null // must be undefined, null means id has been cleared due to error
+  logid: number | null = null // null means no active log or id has been cleared
 
   heartbeat: any
 
@@ -135,13 +135,13 @@ export default class DBLog implements DBProps {
   #get = {
     last: async (title: string, msg?: string) => {
       const qry = `select top 1 *,
-                case 
-                  when end_time is not null then 'true'
+                case
+                  when end_time is not null then 'false'
                   when datediff(second, heartbeat, getdate()) < 60 then 'true'
                 else 'false'
                 end as isRunning
-        from dbo.log 
-        where title = @_title 
+        from dbo.log
+        where title = @_title
         ${msg ? "and msg = @_msg" : ""}
         order by logid desc`
       const res = await this.db.exec(qry, { title, msg }, true)
@@ -150,7 +150,7 @@ export default class DBLog implements DBProps {
     fields: (props: any): string => {
       const fieldNames = ["title", "msg", "props", "error", "status"]
       const updatedFields = fieldNames
-        .filter((fieldName) => props[fieldName])
+        .filter((fieldName) => props[fieldName] !== undefined && props[fieldName] !== null)
         .map((fieldName) => `${fieldName} = @_${fieldName}`)
 
       return updatedFields.join(",")
@@ -205,15 +205,13 @@ export default class DBLog implements DBProps {
 
     log && log("\x1b[31m", error, props)
 
-    const { message, stack, ...rest } = error || {}
     await this.updateAll({
       status: "error",
       end_time: true,
-      msg: err?.message,
+      msg: error.message,
       props,
       error,
     })
-    this.logid = null
   }
 
   async success(msg?: string | null, props?: PlainObj) {
